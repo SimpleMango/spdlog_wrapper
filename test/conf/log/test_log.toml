@@ -1,0 +1,8 @@
+[[logger]]
+name = "module_1"
+level = "trace"
+
+[[logger]]
+name = "module_2"
+level = "trace"
+simple_pattern = true
