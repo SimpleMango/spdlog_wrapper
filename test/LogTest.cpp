@@ -1,11 +1,11 @@
-#include <gtest/gtest.h>
-
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/benchmark/catch_benchmark.hpp"
 #include "log/Log.h"
 #include "thread/ThreadUtils.h"
 
-TEST(LogTest, spdlog)
+TEST_CASE("LogTest", "[spdlog]")
 {
-    EXPECT_EQ(true, frame::Log::Init("test"));
+    REQUIRE(true == frame::Log::Init("test"));
 
     ThreadUtils::BindThisThread(3);
 
@@ -21,9 +21,12 @@ TEST(LogTest, spdlog)
     }
 }
 
-
-GTEST_API_ int main(int argc, char** argv)
+TEST_CASE("LogBench", "![spdlog]")
 {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    REQUIRE(true == frame::Log::Init("test"));
+
+    int i = 0;
+    BENCHMARK("mango"){
+       LOG_CRITICAL(module_2, "this is a line {}", i++);
+    };
 }

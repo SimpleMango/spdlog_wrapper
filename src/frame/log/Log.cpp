@@ -1,7 +1,8 @@
 #include "log/Log.h"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iomanip>
+#include <pthread.h>
 
 #include "tomlplusplus/toml.hpp"
 
@@ -9,9 +10,7 @@ namespace frame {
 
 bool IsFolderExists(const std::string& folder_path)
 {
-    // return std::filesystem::exists(folder_path) && std::filesystem::is_directory(folder_path);
-    return std::experimental::filesystem::exists(folder_path) &&
-           std::experimental::filesystem::is_directory(folder_path);
+     return std::filesystem::exists(folder_path) && std::filesystem::is_directory(folder_path);
 }
 
 bool Log::Init(const std::string& process_name)
@@ -24,12 +23,11 @@ bool Log::Init(const std::string& process_name)
     // default_async_q_size
     spdlog::init_thread_pool(spdlog::details::default_async_q_size, 1, []() {
       const char* thread_name = "SpdlogThPool";
-      (void)pthread_setname_np(pthread_self(), thread_name);
+      (void)pthread_setname_np(/*pthread_self(),*/ thread_name);
     });
 
     const std::string conf_path = "conf/log/" + process_name + "_log.toml";
-    // if (!std::filesystem::exists(conf_path))
-    if (!std::experimental::filesystem::exists(conf_path))
+    if (!std::filesystem::exists(conf_path))
     {
         SPDLOG_CRITICAL("conf file is not exist");
         return false;
@@ -37,11 +35,7 @@ bool Log::Init(const std::string& process_name)
 
     const std::string log_dir = "log/" + process_name;
 
-    if (!IsFolderExists(log_dir))
-    {
-        // std::filesystem::create_directories(log_dir);
-        std::experimental::filesystem::create_directories(log_dir);
-    }
+    if (!IsFolderExists(log_dir)) std::filesystem::create_directories(log_dir);
 
     try
     {
@@ -50,8 +44,8 @@ bool Log::Init(const std::string& process_name)
         SPDLOG_INFO("spdlog config is array: {}, is array of tables: {}", node.is_array(), node.is_array_of_tables());
         for (std::size_t i = 0; i < node.as_array()->size(); ++i)
         {
-            SPDLOG_INFO("Logger:{}, Level:{}, SimplePattern:{}", *node[i]["name"].value<std::string>(),
-                        *node[i]["level"].value<std::string>(), *node[i]["simple_pattern"].value<bool>());
+            SPDLOG_INFO("Logger:{},\tLevel:{}", *node[i]["name"].value<std::string>(),
+                        *node[i]["level"].value<std::string>());
             std::tm time = spdlog::details::os::localtime();
             std::ostringstream oss;
             oss << std::put_time(&time, "%Y-%m-%d_%H:%M:%S");
@@ -63,11 +57,6 @@ bool Log::Init(const std::string& process_name)
 
             spdlog::level::level_enum level = spdlog::level::from_str(log_level.data());
             logger->set_level(level);
-
-            if (*node[i]["simple_pattern"].value<bool>())
-            {
-                logger->set_pattern("%m%d %H:%M:%S.%f %v");
-            }
         }
     }
     catch (const toml::parse_error& err)

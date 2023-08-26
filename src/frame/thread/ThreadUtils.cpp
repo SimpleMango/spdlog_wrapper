@@ -6,6 +6,7 @@
 
 bool ThreadUtils::BindThisThread(int cpu)
 {
+    /*
     int cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
     if (cpu >= cpu_count) return false;
 
@@ -14,5 +15,6 @@ bool ThreadUtils::BindThisThread(int cpu)
     CPU_SET(3, &cpu_set);
     int ret = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t), &cpu_set);
     if (ret != 0) return false;
+    */
     return true;
 }

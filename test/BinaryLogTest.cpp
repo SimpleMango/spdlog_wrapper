@@ -1,12 +1,11 @@
-#include <gtest/gtest.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/stopwatch.h>
-
+#include "catch2/catch_test_macros.hpp"
 #include "log/BinaryLog.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/stopwatch.h"
 
-constexpr int write_count = 1000'000'000;
+constexpr long write_count = 1'000'000;
 
-TEST(LogTest, BinaryWrite)
+TEST_CASE("BinaryLogTest", "[BinaryWrite]")
 {
     frame::BinaryLog bl;
     bl.Init("log/log.bin");
